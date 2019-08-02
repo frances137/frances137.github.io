@@ -1,6 +1,6 @@
 /* global d3 */
 var margin = {top: 25, right: 60, bottom: 60, left: 60},
-    width = window.innerWidth - margin.left - margin.right, // Use the window's width 
+    width = (window.innerWidth * (2/3)), // Use the window's width 
     height = window.innerHeight - margin.top - margin.bottom - 100, // Use the window's height (-100 to remove buttons height and margins)
     duration = 1500,
     data,
