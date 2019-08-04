@@ -32,7 +32,7 @@ and open the template in the editor.
 div.tooltip {	
     position: absolute;			
     text-align: left;			
-    width: 125px;					
+    width: 135px;					
     height: 35px;					
     padding: 3px;				
     font: 12px sans-serif;		
@@ -41,7 +41,3 @@ div.tooltip {
     border-radius: 8px;			
     pointer-events: none;			
 }
-
-
-
-
