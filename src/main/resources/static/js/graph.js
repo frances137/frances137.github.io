@@ -11,22 +11,9 @@ var margin = {top: 25, right: 60, bottom: 60, left: 80},
     yScale,
     yAxis,
     yLabel,
-    circleInitialPosition = 200,
-    circleCount = 7,
-    circleSpacing = width/(circleCount+1),
-    circleMovingIncrement = 30,
     lastScene = 1,
     maxPopulationIndex;
     
-d3.selection.prototype.moveToBack = function() {  
-        return this.each(function() { 
-            var firstChild = this.parentNode.firstChild; 
-            if (firstChild) { 
-                this.parentNode.insertBefore(this, firstChild); 
-            } 
-        });
-    };
-
 async function init() {
     data = await d3.csv("data/population-pr.csv");
     removeCommas(data, "Population");
@@ -96,17 +83,17 @@ function goToScene(scene) {
     switch (scene) {
         case 1:
             if (lastScene === 1) {
-                updateAxisY("Population", "Population", "Puerto Rico's Population Growth");
+                updateAxisY("Population", "Population", "Population - Puerto Rico", 100000);
                 addAnnotation(xScale(data[maxPopulationIndex].Year),
                         yScale(data[maxPopulationIndex].Population),
                         "Population reached its peak",
                         "annotation1");
                 playScene1();
             } else if (lastScene === 2) {
-                removeAnnotations("annotation2");
+                removeAnnotation("annotation2");
                 rewindScene2();
             } else {
-                updateAxisY("Population", "Population", "Puerto Rico's Population Growth");
+                updateAxisY("Population", "Population", "Population - Puerto Rico", 100000);
                 rewindScene3();
                 rewindScene2();
                 addAnnotation(xScale(data[maxPopulationIndex].Year),
@@ -122,10 +109,10 @@ function goToScene(scene) {
                 playScene2();
                 addAnnotation(xScale(data[data.length - 1].Year),
                         yScale(data[data.length - 1].Population),
-                        "Population dropped 9% in apprx 11 years",
+                        "Population dropped around 9%",
                         "annotation2");
             } else if (lastScene === 3) {
-                updateAxisY("Population", "Population", "Puerto Rico's Population Growth");
+                updateAxisY("Population", "Population", "Population - Puerto Rico", 100000);
                 rewindScene3();
                 addAnnotation(xScale(data[maxPopulationIndex].Year),
                         yScale(data[maxPopulationIndex].Population),
@@ -133,28 +120,26 @@ function goToScene(scene) {
                         "annotation1");
                 addAnnotation(xScale(data[data.length - 1].Year),
                         yScale(data[data.length - 1].Population),
-                        "Population dropped 9% in apprx 11 years",
+                        "Population dropped around 9%",
                         "annotation2");
             }
             
             lastScene = 2;
             break;
         case 3:
-            removeAnnotations("annotation1");
-            removeAnnotations("annotation2");
-            updateAxisY("colName", "Rate of Change", "Puerto Rico's Population Rate of Change");
+            updateAxisY("rateGrowth", "Growth Rate", "Annual Population Growth Rates - Puerto Rico", 1000);
+            removeAnnotation("annotation1");
+            removeAnnotation("annotation2");
             if (lastScene === 1) {
                 playScene2();
-                playScene3();
-            } else if(lastScene === 2) {
-                playScene3();
-            } 
-            
+            }
+            playScene3();
             lastScene = 3;
             break;
         default:
         // code block
     }
+    updateSceneMessage();
 }
 
 function playScene1() {
@@ -207,11 +192,13 @@ function rewindScene2() {
 function playScene3() {
     canvas.transition("playScene3")
             .attr("cy", function (d) {
-                return yScale(d.colName);
+                console.log("Year: " + d.Year + " Rate: " + d.rateGrowth);
+                return yScale(d.rateGrowth);
             })
             .duration(duration);
     
-    addTooltip(canvas, "yLabel", "colName");
+    addTooltip(canvas, "Growth Rate", "rateGrowth");
+    addAxisZero();
 }
 
 function rewindScene3() {
@@ -222,6 +209,7 @@ function rewindScene3() {
             .duration(duration);
     
     addTooltip(canvas, "Population", "Population");
+    removeAxisZero();
 }
 
 function addTooltip(points, yLabel, param) {
@@ -279,9 +267,9 @@ function getArray(arr, field) {
    return newArray;
 }
 
-function updateAxisY(field, label, title) {
+function updateAxisY(field, label, title, padding) {
     yScale = d3.scaleLinear()
-            .domain([parseInt(getMin(data, field)) - 100000, parseInt(getMax(data, field)) + 100000])
+            .domain([parseInt(getMin(data, field)) - padding, parseInt(getMax(data, field)) + padding])
             .range([height, 0]);
 
     // Update axis
@@ -349,7 +337,7 @@ function addAnnotation (x, y, text, annotation){
     .duration(duration/2);
 }
 
-function removeAnnotations(annotation) {
+function removeAnnotation(annotation) {
     var annotations = d3.selectAll("." + annotation)
             .attr("opacity", 1)
             .transition()
@@ -359,3 +347,49 @@ function removeAnnotations(annotation) {
     annotations.remove();
 }
 
+function addAxisZero() {
+  var axis = svg
+    .append("g")
+      .classed("axis0", true)
+      .attr("transform", "translate(" + margin.left + "," + (yScale(0) + margin.top) + ")")
+  
+  axis.append("line")
+    .classed("body", true)
+    .attr("x1", 0)
+    .attr("y1", 0)
+    .attr("x2", width - margin.right)
+    .attr("y2", 0)
+    .attr("stroke-dasharray", "5")
+    .style("stroke", 'grey');
+
+}
+
+function removeAxisZero(){
+    var axis = d3.selectAll(".axis0")
+            .attr("opacity", 1)
+            .transition()
+            .attr("opacity", 0)
+    .duration(duration/2);
+      
+    axis.remove();
+}
+
+function updateSceneMessage() {
+    switch(lastScene){
+        case 1:
+            d3.selectAll("h4").text("A growing population");
+            d3.selectAll("p")
+                    .text("The Puerto Rican population grew at a steady pace, increasing from 2.4 million in the early 1960s to a peak of around 3.8 million in 2004");
+            break;
+        case 2:
+            d3.selectAll("h4").text("Population reduction");
+            d3.selectAll("p")
+                    .text("The population growth rate became negative in 2005. In a span of 14 years the population dropped to 3.2 million, a loss of about 630,000 residents. This reduction can be attributed to the fact that residents have greater access to contraceptive methods, an increase in the participation of women in the workforce, and people are better educated. In addition, the economy of Puerto Rico has made it more difficult for some to raise children.");
+            break;
+        case 3:
+            d3.selectAll("h4").text("Growth rate descending");
+            d3.selectAll("p")
+                    .text("Some relate the loss of population to the derogation of Section 936 of the Revenue Code (signed on 1996 but effective in 2005) which exempted multinational corporations from paying U.S. contributions on the profits from their operations on the island. The largest of the exoduses was in 2018 due to the destruction that Hurricane Maria left after passing through the island the previous year.");
+            break;
+    }
+}
