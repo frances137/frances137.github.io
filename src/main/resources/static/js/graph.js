@@ -377,18 +377,18 @@ function removeAxisZero(){
 function updateSceneMessage() {
     switch(lastScene){
         case 1:
-            d3.selectAll("h4").text("A growing population");
-            d3.selectAll("p")
+            d3.selectAll("#boxTitle").text("A growing population");
+            d3.selectAll("#boxDetail")
                     .text("The Puerto Rican population grew at a steady pace, increasing from 2.4 million in the early 1960s to a peak of around 3.8 million in 2004");
             break;
         case 2:
-            d3.selectAll("h4").text("Population reduction");
-            d3.selectAll("p")
+            d3.selectAll("#boxTitle").text("Population reduction");
+            d3.selectAll("#boxDetail")
                     .text("The population growth rate became negative in 2005. In a span of 14 years the population dropped to 3.2 million, a loss of about 630,000 residents. This reduction can be attributed to the fact that residents have greater access to contraceptive methods, an increase in the participation of women in the workforce, and people are better educated. In addition, the economy of Puerto Rico has made it more difficult for some to raise children.");
             break;
         case 3:
-            d3.selectAll("h4").text("Growth rate descending");
-            d3.selectAll("p")
+            d3.selectAll("#boxTitle").text("Growth rate descending");
+            d3.selectAll("#boxDetail")
                     .text("Some relate the loss of population to the derogation of Section 936 of the Revenue Code (signed on 1996 but effective in 2005) which exempted multinational corporations from paying U.S. contributions on the profits from their operations on the island. The largest of the exoduses was in 2018 due to the destruction that Hurricane Maria left after passing through the island the previous year.");
             break;
     }
